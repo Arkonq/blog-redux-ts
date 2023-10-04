@@ -1,8 +1,8 @@
 import {BrowserRouter, Routes, Route} from 'react-router-dom';
 import Home from './features/home/Home';
 import Create from './features/create/Create';
-import Navbar from './features/navbar/Navbar';
 import Details from './features/details/Details';
+import Navbar from './features/navbar/Navbar';
 
 function App() {
 

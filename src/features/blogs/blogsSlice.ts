@@ -1,41 +1,81 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { Blog, BlogsRootState } from '../types';
 
-export interface Blog {
-  title: string,
-  body: string, 
-  id: number
-}
+export const fetchBlogs = createAsyncThunk('blogs/fetchBlogs', () => {
+  return fetch('http://localhost:8000/blogs')
+    .then(res => res.json());
+})
 
-export interface Blogs extends Array<Blog>{
-  blogs: Array<Blog>
-}
+export const deleteBlog = createAsyncThunk('blogs/deleteBlog', async (id: number) => {
+  return await fetch('http://localhost:8000/blogs/' + id, { method: "DELETE" })
+    .then(res => res.json());
+})
+
+export const createBlog = createAsyncThunk('blogs/createBlog', async (data: Blog) => {
+  return await fetch('http://localhost:8000/blogs', {
+    method: "POST", 
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+    .then(res => res.json());
+})
 
 const blogsSlice = createSlice({
   name: "blogs",
-  initialState: [
-    {
-      title: "First post",
-      body: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      id: 1
-    },
-    {
-      title: "Second post",
-      body: "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum. Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
-      id: 2
-    },
-  ] as Blogs,
-  reducers: {
-    add: (state, action) => { // Mutating Immutable data because redux toolkit allows to
-      const newState = state.concat();
-      newState.push(action.payload);
-      return newState as Blogs;
-    },
-    remove: (state: Blogs, action) => {
-      return state.filter(blog => blog.id !== action.payload) as Blogs;
-    }
+  initialState: {
+    loading: false,
+    blogs: [],
+    error: '',
+  } as BlogsRootState,
+  reducers: {},
+  extraReducers: (builder) => {
+    // Fetch all Blogs
+    builder.addCase(fetchBlogs.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(fetchBlogs.fulfilled, (state, action) => {
+      state.loading = false;
+      state.blogs = action.payload;
+      state.error = '';
+    });
+    builder.addCase(fetchBlogs.rejected, (state, action) => {
+      state.loading = false;
+      state.blogs = [];
+      state.error = action.error.message!;
+    });
+    // Delete Blog by Id
+    builder.addCase(deleteBlog.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(deleteBlog.fulfilled, (state, action) => {
+      state.loading = false;
+      state.blogs = action.payload;
+      state.error = '';
+    });
+    builder.addCase(deleteBlog.rejected, (state, action) => {
+      state.loading = false;
+      state.blogs = [];
+      state.error = action.error.message!;
+    });
+    // Add Blog
+    builder.addCase(createBlog.pending, (state) => {
+      state.loading = true;
+    });
+    builder.addCase(createBlog.fulfilled, (state, action) => {
+      state.loading = false;
+      state.blogs = action.payload;
+      state.error = '';
+    });
+    builder.addCase(createBlog.rejected, (state, action) => {
+      state.loading = false;
+      state.blogs = [];
+      state.error = action.error.message!;
+    });
   }
 })
 
-export const { add, remove } = blogsSlice.actions;
-export const selectBlogs = (state: Array<any>) => state;
+// export const { add, remove } = blogsSlice.actions;
+// export const selectBlogs = (state: Array<any>) => state;
 export default blogsSlice.reducer;

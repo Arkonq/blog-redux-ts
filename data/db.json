@@ -1,0 +1,17 @@
+{
+  "blogs": [
+    {
+      "title": "fsafsa",
+      "body": "fsafsaf",
+      "id": 1
+    }
+  ],
+  "users": [
+    {
+      "id": 1,
+      "email": "arkonq@gmail.com",
+      "password": "12345",
+      "name": "Name"
+    }
+  ]
+}
